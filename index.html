@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>我的課表 - 初二正</title>
+    
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/themes/dark.css">
+    <link rel="stylesheet" href="styles/themes/light.css">
+    <link rel="stylesheet" href="styles/components/cards.css">
+    <link rel="stylesheet" href="styles/components/buttons.css">
+    <link rel="stylesheet" href="styles/components/animations.css">
+    <link rel="stylesheet" href="styles/pages/menu.css">
+    <link rel="stylesheet" href="styles/pages/schedule.css">
+    <link rel="stylesheet" href="styles/pages/realtime.css">
+    <link rel="stylesheet" href="scripts/modules/search/search.css">
+    <link rel="stylesheet" href="scripts/modules/theme/theme.css">
+    <link rel="stylesheet" href="scripts/modules/weekly/weekly.css">
+    <link rel="stylesheet" href="scripts/modules/holidays/holidays.css">
+    <link rel="stylesheet" href="scripts/modules/expand/expand.css">
+</head>
+<body>
+
+<div class="phone-mockup">
+    <div class="dynamic-island"></div>
+    <div class="status-bar"></div>
+
+    <div id="app-content">
+        
+        <!-- 頁面 1：首頁選單 -->
+        <div id="page-menu" class="page active">
+            <button class="theme-toggle-corner" id="theme-toggle" onclick="toggleTheme()">🌙</button>
+            
+            <div class="menu-title">
+                <div class="sub">我的課表</div>
+                <div class="main">請選擇模式</div>
+            </div>
+            
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="🔍 搜尋科目、老師或日期...">
+                <div id="search-results" class="search-results"></div>
+            </div>
+            
+            <div class="menu-cards">
+                <button class="menu-btn" onclick="switchPage('page-schedule', 'tomorrow')">📅 明天課表預測</button>
+                <button class="menu-btn" onclick="switchPage('page-realtime')">⏱️ 上/下課倒數</button>
+                <button class="menu-btn" onclick="switchPage('page-weekly')">📊 本週課表總覽</button>
+                <button class="menu-btn" onclick="switchPage('page-holidays')">🎉 下一個假期倒數</button>
+            </div>
+            
+            <div class="footer">© Ray Cheung</div>
+        </div>
+
+        <!-- 頁面 2：課表 -->
+        <div id="page-schedule" class="page">
+            <button class="back-btn" id="schedule-back-btn" onclick="switchPage('page-menu')">◀ 返回</button>
+            <div class="schedule-header">
+                <div class="title" id="schedule-title-text">明日課表</div>
+                <div class="date" id="schedule-date-text">載入中...</div>
+            </div>
+            <div class="schedule-list" id="schedule-list-container"></div>
+        </div>
+
+        <!-- 頁面 3：即時倒數 -->
+        <div id="page-realtime" class="page">
+            <button class="back-btn" onclick="switchPage('page-menu')">◀ 返回</button>
+            <div class="realtime-clock">
+                <div class="label">即時時間</div>
+                <div class="time" id="live-clock">00:00:00</div>
+                <div class="utc">UTC+8</div>
+            </div>
+            <div class="status-container" id="status-container"></div>
+            <button class="view-full-btn" onclick="switchPage('page-schedule', 'today')">查看原整課表</button>
+            <div class="footer">© Ray Cheung</div>
+        </div>
+
+        <!-- 頁面 4：本週總覽 -->
+        <div id="page-weekly" class="page">
+            <button class="back-btn" onclick="switchPage('page-menu')">◀ 返回</button>
+            <div class="weekly-header">
+                <div class="title">本週課表總覽</div>
+            </div>
+            <div class="weekly-grid" id="weekly-grid-container"></div>
+        </div>
+
+        <!-- 頁面 5：假期倒數 -->
+        <div id="page-holidays" class="page">
+            <button class="back-btn" onclick="switchPage('page-menu')">◀ 返回</button>
+            <div class="holidays-header">
+                <div class="title">下一個假期</div>
+            </div>
+            <div class="holidays-container" id="holidays-container"></div>
+        </div>
+
+    </div>
+</div>
+
+<script src="scripts/utils/time.js"></script>
+<script src="scripts/utils/storage.js"></script>
+<script src="scripts/modules/search/search.js"></script>
+<script src="scripts/modules/theme/theme.js"></script>
+<script src="scripts/modules/weekly/weekly.js"></script>
+<script src="scripts/modules/holidays/holidays.js"></script>
+<script src="scripts/modules/animations/animations.js"></script>
+<script src="scripts/modules/expand/expand.js"></script>
+<script src="scripts/main.js"></script>
+
+</body>
+</html>
