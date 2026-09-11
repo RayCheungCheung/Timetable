@@ -1,0 +1,11 @@
+:root[data-theme="dark"], :root:not([data-theme]) {
+    --bg-color: #1a1a1a;
+    --text-main: #ffffff;
+    --text-dark: #1a1a1a;
+    --text-muted: #666666;
+    --card-purple: #b0b5d1;
+    --card-purple-dark: #a0a5c1;
+    --btn-bg: #d1d5e6;
+    --now-red: #ff3b30;
+    --coming-green: #34c759;
+}
