@@ -1,0 +1,23 @@
+.theme-toggle-corner {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background-color: var(--card-purple);
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    transition: all 0.2s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.theme-toggle-corner:active {
+    transform: scale(0.9);
+    background-color: var(--card-purple-dark);
+}
