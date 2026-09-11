@@ -1,0 +1,11 @@
+:root[data-theme="light"] {
+    --bg-color: #f5f5f7;
+    --text-main: #1a1a1a;
+    --text-dark: #1a1a1a;
+    --text-muted: #8e8e93;
+    --card-purple: #d1d5e6;
+    --card-purple-dark: #b0b5d1;
+    --btn-bg: #e5e5ea;
+    --now-red: #ff3b30;
+    --coming-green: #34c759;
+}
