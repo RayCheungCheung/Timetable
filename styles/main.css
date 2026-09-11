@@ -1,0 +1,115 @@
+:root {
+    --font-family: -apple-system, BlinkMacSystemFont, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: #000000;
+    color: var(--text-main);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 20px;
+    overflow: hidden;
+}
+
+.phone-mockup {
+    width: 100%;
+    max-width: 393px;
+    height: 852px;
+    background-color: var(--bg-color);
+    border-radius: 55px;
+    box-shadow: 0 0 0 12px #2c2c2e, 0 0 0 14px #1c1c1e, 0 30px 60px rgba(0,0,0,0.8);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.dynamic-island {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 35px;
+    background-color: #000;
+    border-radius: 20px;
+    z-index: 1000;
+}
+
+.status-bar {
+    height: 45px;
+    width: 100%;
+}
+
+#app-content {
+    flex: 1;
+    padding: 10px 20px 30px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+#app-content::-webkit-scrollbar {
+    display: none;
+}
+
+.page {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+}
+
+.page.active {
+    display: flex;
+}
+
+.back-btn {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    z-index: 100;
+    font-family: var(--font-family);
+}
+
+@media (max-width: 500px) {
+    body {
+        padding: 0;
+        align-items: stretch;
+    }
+    .phone-mockup {
+        max-width: 100%;
+        width: 100%;
+        height: 100dvh;
+        border-radius: 0;
+        box-shadow: none;
+    }
+    .dynamic-island {
+        display: none;
+    }
+    .status-bar {
+        height: 20px;
+    }
+    #app-content {
+        padding: 5px 15px 20px;
+    }
+}
