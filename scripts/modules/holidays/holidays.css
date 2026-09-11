@@ -1,0 +1,98 @@
+.holidays-header {
+    background-color: var(--card-purple);
+    border-radius: 25px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+    margin-top: 50px;
+}
+
+.holidays-header .title {
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--text-dark);
+}
+
+.holidays-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding-bottom: 30px;
+}
+
+.holiday-card {
+    background-color: var(--card-purple);
+    border-radius: 22px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+}
+
+.holiday-card.next-holiday {
+    box-shadow: 0 0 0 4px var(--now-red);
+}
+
+.holiday-emoji {
+    font-size: 40px;
+    flex-shrink: 0;
+}
+
+.holiday-info {
+    flex-grow: 1;
+}
+
+.holiday-name {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--text-dark);
+    margin-bottom: 4px;
+}
+
+.holiday-date {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.holiday-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.holiday-countdown {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--now-red);
+    color: white;
+    border-radius: 15px;
+    padding: 10px 15px;
+    min-width: 70px;
+    flex-shrink: 0;
+}
+
+.countdown-number {
+    font-size: 24px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.countdown-label {
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 4px;
+    opacity: 0.9;
+}
+
+.holiday-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    font-size: 18px;
+    font-weight: 600;
+}
