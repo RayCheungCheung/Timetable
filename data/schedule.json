@@ -9,7 +9,7 @@
         { "period": 7, "start": "15:05", "end": "15:45", "subject": "體育與健", "teacher": "徐梓駿" }
     ],
     "2": [
-        { "period": 1, "start": "08:10", "end": "08:50", "subject": "中文", "teacher": "劉梓晴" },
+        { "period": 1, "start": "08:10", "end": "08:50", "subject": "中文2", "teacher": "：鄭炳弟團" },
         { "period": 2, "start": "09:00", "end": "09:40", "subject": "數學(幾何)", "teacher": "趙婧雅" },
         { "period": 3, "start": "09:50", "end": "10:30", "subject": "品德公民", "teacher": "吳倩澄" },
         { "period": 4, "start": "10:40", "end": "11:20", "subject": "中文", "teacher": "劉梓晴" },
