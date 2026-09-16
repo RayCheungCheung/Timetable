@@ -19,6 +19,8 @@
     <link rel="stylesheet" href="scripts/modules/weekly/weekly.css">
     <link rel="stylesheet" href="scripts/modules/holidays/holidays.css">
     <link rel="stylesheet" href="scripts/modules/expand/expand.css">
+    <link rel="stylesheet" href="scripts/modules/calendar/calendar.css">
+    <link rel="stylesheet" href="scripts/modules/homework/homework.css">
 </head>
 <body>
 
@@ -47,6 +49,7 @@
                 <button class="menu-btn" onclick="switchPage('page-realtime')">⏱️ 上/下課倒數</button>
                 <button class="menu-btn" onclick="switchPage('page-weekly')">📊 本週課表總覽</button>
                 <button class="menu-btn" onclick="switchPage('page-holidays')">🎉 下一個假期倒數</button>
+                <button class="menu-btn" onclick="switchPage('page-calendar')">📅 月曆</button>
             </div>
             
             <div class="footer">© Ray Cheung</div>
@@ -93,6 +96,48 @@
             <div class="holidays-container" id="holidays-container"></div>
         </div>
 
+        <!-- 頁面 6：月曆 -->
+        <div id="page-calendar" class="page">
+            <button class="back-btn" onclick="switchPage('page-menu')">◀ 返回</button>
+
+            <div class="cal-toolbar">
+                <button class="cal-today-btn" onclick="goToCalendarToday()">今天</button>
+                <button class="cal-nav-btn" onclick="changeCalendarMonth(-1)">‹</button>
+                <button class="cal-nav-btn" onclick="changeCalendarMonth(1)">›</button>
+                <div class="cal-title" id="calendar-title">2026年9月</div>
+                <button class="cal-add-btn" onclick="openAddCalendarEventModal()">＋</button>
+            </div>
+
+            <div class="cal-weekdays">
+                <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+            </div>
+
+            <div class="cal-grid" id="calendar-grid"></div>
+
+            <div class="cal-day-events">
+                <div class="cal-day-title" id="calendar-events-title">今日事件</div>
+                <div class="cal-day-list" id="calendar-events-list"></div>
+            </div>
+        </div>
+
+
+
+<!-- 新增事件彈窗（月曆用） -->
+<div class="modal-overlay" id="add-calendar-event-modal">
+    <div class="modal-content">
+        <div class="modal-title">新增事件</div>
+        <input type="date" id="calendar-event-date" class="modal-input">
+        <input type="text" id="calendar-event-title" class="modal-input" placeholder="事件名稱（例如：數學測驗）">
+        <select id="calendar-event-type" class="modal-input">
+            <option value="exam">📝 測驗 / 考試</option>
+            <option value="homework">📚 作業截止</option>
+            <option value="activity">🎯 活動</option>
+            <option value="holiday">🎉 假期</option>
+        </select>
+        <div class="modal-buttons">
+            <button class="modal-btn cancel" onclick="closeAddCalendarEventModal()">取消</button>
+            <button class="modal-btn confirm" onclick="saveCalendarEvent()">儲存</button>
+        </div>
     </div>
 </div>
 
@@ -104,6 +149,8 @@
 <script src="scripts/modules/holidays/holidays.js"></script>
 <script src="scripts/modules/animations/animations.js"></script>
 <script src="scripts/modules/expand/expand.js"></script>
+<script src="scripts/modules/calendar/calendar.js"></script>
+<script src="scripts/modules/homework/homework.js"></script>
 <script src="scripts/main.js"></script>
 
 </body>
