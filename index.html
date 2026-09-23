@@ -5,6 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>我的課表 - 初二正</title>
     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- PWA 主題色 -->
+    <meta name="theme-color" content="#b0b5d1">
+    
+    <!-- iOS 支援 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="我的課表">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+    
+    <!-- 一般 favicon -->
+    <link rel="icon" type="image/png" href="assets/icons/icon-192.png">
+    
+    <!-- 樣式表 -->
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/themes/dark.css">
     <link rel="stylesheet" href="styles/themes/light.css">
@@ -21,7 +37,6 @@
     <link rel="stylesheet" href="scripts/modules/expand/expand.css">
     <link rel="stylesheet" href="scripts/modules/calendar/calendar.css">
     <link rel="stylesheet" href="scripts/modules/homework/homework.css">
-    <link rel="stylesheet" href="scripts/modules/weekly/weekly.css">
 </head>
 <body>
 
@@ -51,6 +66,7 @@
                 <button class="menu-btn" onclick="switchPage('page-weekly')">📊 本週課表總覽</button>
                 <button class="menu-btn" onclick="switchPage('page-holidays')">🎉 下一個假期倒數</button>
                 <button class="menu-btn" onclick="switchPage('page-calendar')">📅 月曆</button>
+                <button class="menu-btn" onclick="switchPage('page-homework')">📚 測驗 / 作業倒數</button>
             </div>
             
             <div class="footer">© Ray Cheung</div>
@@ -121,9 +137,20 @@
             </div>
         </div>
 
+        <!-- 頁面 7：測驗 / 作業倒數 -->
+        <div id="page-homework" class="page">
+            <button class="back-btn" onclick="switchPage('page-menu')">◀ 返回</button>
+            <div class="hw-header">
+                <div class="title">測驗 / 作業倒數</div>
+            </div>
+            <div class="hw-container" id="homework-container"></div>
+            <div class="footer">© Ray Cheung</div>
+        </div>
 
+    </div>
+</div>
 
-<!-- 新增事件彈窗（月曆用） -->
+<!-- 新增事件彈窗（月曆用，放喺 .phone-mockup 外面） -->
 <div class="modal-overlay" id="add-calendar-event-modal">
     <div class="modal-content">
         <div class="modal-title">新增事件</div>
@@ -153,6 +180,21 @@
 <script src="scripts/modules/calendar/calendar.js"></script>
 <script src="scripts/modules/homework/homework.js"></script>
 <script src="scripts/main.js"></script>
+
+<!-- 註冊 Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/Timetable/service-worker.js')
+            .then((registration) => {
+                console.log('Service Worker 註冊成功:', registration.scope);
+            })
+            .catch((error) => {
+                console.log('Service Worker 註冊失敗:', error);
+            });
+    });
+}
+</script>
 
 </body>
 </html>
