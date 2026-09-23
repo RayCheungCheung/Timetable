@@ -1,5 +1,12 @@
+/* ================= 基礎設定 ================= */
 :root {
     --font-family: -apple-system, BlinkMacSystemFont, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+    --header-height: 100px;
+    --nav-height: 80px;
+    --spacing-xs: 4px;
+    --spacing-sm: 10px;
+    --spacing-md: 14px;
+    --spacing-lg: 18px;
 }
 
 * {
@@ -22,6 +29,7 @@ body {
     overflow: hidden;
 }
 
+/* ================= 手機外框 ================= */
 .phone-mockup {
     width: 100%;
     max-width: 393px;
@@ -33,6 +41,8 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    margin: 0 auto;
+    transition: background-color 0.3s ease;
 }
 
 .dynamic-island {
@@ -50,15 +60,83 @@ body {
 .status-bar {
     height: 45px;
     width: 100%;
+    flex-shrink: 0;
 }
 
+/* ================= 頂部 Header ================= */
+#app-header {
+    padding: 0 var(--spacing-md) var(--spacing-sm);
+    flex-shrink: 0;
+    z-index: 100;
+    background-color: var(--bg-color);
+    position: relative;
+    transition: background-color 0.3s ease;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+    height: 34px;
+    padding-right: 2px;
+}
+
+.header-title {
+    font-size: 19px;
+    font-weight: 900;
+    color: var(--text-main);
+    line-height: 1;
+    transition: color 0.3s ease;
+}
+
+.theme-toggle-corner {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    color: var(--text-main);
+    flex-shrink: 0;
+    margin-right: 2px;
+    position: relative;
+    outline: none;
+}
+
+.theme-toggle-corner:hover {
+    background-color: rgba(128, 128, 128, 0.15);
+}
+
+.theme-toggle-corner:active {
+    transform: scale(0.9);
+    background-color: rgba(128, 128, 128, 0.2);
+}
+
+.theme-toggle-corner .theme-icon {
+    display: inline-block;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+
+.theme-toggle-corner.switching .theme-icon {
+    transform: rotate(180deg) scale(0.5);
+    opacity: 0;
+}
+
+/* ================= 主內容區域 ================= */
 #app-content {
     flex: 1;
-    padding: 10px 20px 30px;
+    padding: var(--spacing-sm) var(--spacing-md);
     overflow-y: auto;
-    display: flex;
-    flex-direction: column;
+    overflow-x: hidden;
     position: relative;
+    padding-bottom: 20px;
+    -webkit-overflow-scrolling: touch;
 }
 
 #app-content::-webkit-scrollbar {
@@ -68,48 +146,276 @@ body {
 .page {
     display: none;
     flex-direction: column;
-    height: 100%;
+    width: 100%;
 }
 
 .page.active {
     display: flex;
+    animation: pageFadeIn 0.25s ease;
 }
 
-.back-btn {
+@keyframes pageFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ================= 底部導航欄（Liquid Glass Floating Capsule） ================= */
+#bottom-nav {
+    position: relative;
+    padding: 8px 12px 12px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0));
+    flex-shrink: 0;
+    z-index: 100;
+    background-color: transparent;
+}
+
+.nav-capsule {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: 60px;
+    border-radius: 30px;
+    background-color: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="light"] .nav-capsule {
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.nav-indicator {
     position: absolute;
-    top: 10px;
-    left: 20px;
-    background: rgba(255,255,255,0.1);
+    top: 6px;
+    left: 0;
+    width: 60px;
+    height: 48px;
+    border-radius: 24px;
+    background-color: rgba(255, 255, 255, 0.15);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                background-color 0.3s ease;
+    z-index: 1;
+    pointer-events: none;
+}
+
+:root[data-theme="light"] .nav-indicator {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+.nav-indicator.is-sliding {
+    background: linear-gradient(
+        120deg,
+        rgba(255, 0, 128, 0.7) 0%,
+        rgba(255, 200, 0, 0.7) 20%,
+        rgba(0, 255, 128, 0.7) 40%,
+        rgba(0, 200, 255, 0.7) 60%,
+        rgba(128, 0, 255, 0.7) 80%,
+        rgba(255, 0, 128, 0.7) 100%
+    );
+    background-size: 300% 300%;
+    animation: liquidShimmer 1.2s linear infinite;
+    box-shadow: 
+        0 0 20px rgba(255, 100, 200, 0.5),
+        0 0 40px rgba(100, 200, 255, 0.3);
+    filter: saturate(1.5) brightness(1.1);
+}
+
+@keyframes liquidShimmer {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    background: transparent;
     border: none;
-    border-radius: 20px;
-    padding: 8px 16px;
+    cursor: pointer;
+    padding: 6px 0;
+    transition: color 0.3s ease;
+    font-family: var(--font-family);
+    color: var(--text-muted);
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+    text-decoration: none;
+    z-index: 2;
+}
+
+.nav-item:focus,
+.nav-item:focus-visible,
+.nav-item:active {
+    outline: none;
+    border: none;
+    box-shadow: none;
+    text-decoration: none;
+}
+
+.nav-icon {
+    font-size: 20px;
+    line-height: 1;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                filter 0.3s ease,
+                opacity 0.3s ease;
+    filter: grayscale(0.5);
+    opacity: 0.7;
+}
+
+.nav-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: inherit;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+    letter-spacing: 0.3px;
+}
+
+.nav-item.active {
+    color: var(--text-main);
+}
+
+:root[data-theme="light"] .nav-item.active {
+    color: #1C1C1E;
+}
+
+.nav-item.active .nav-icon {
+    filter: grayscale(0);
+    opacity: 1;
+    transform: scale(1.15);
+}
+
+.nav-item.active .nav-label {
+    opacity: 1;
+    font-weight: 900;
+}
+
+.nav-item::before,
+.nav-item::after,
+.nav-item.active::before,
+.nav-item.active::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* ================= 彈窗（Modal） ================= */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background-color: var(--bg-color);
+    border-radius: 25px;
+    padding: 25px;
+    width: 100%;
+    max-width: 320px;
+    box-sizing: border-box;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPop {
+    from { opacity: 0; transform: scale(0.9) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--text-main);
+    margin-bottom: 18px;
+    text-align: center;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 12px;
+    border: none;
+    background-color: var(--card-purple);
     font-size: 15px;
     font-weight: 600;
-    color: #fff;
-    cursor: pointer;
-    z-index: 100;
+    color: var(--text-dark);
+    margin-bottom: 12px;
     font-family: var(--font-family);
+    outline: none;
+    box-sizing: border-box;
+    box-shadow: var(--card-shadow);
+    border: var(--card-border);
 }
 
+.modal-input:focus {
+    box-shadow: 0 0 0 3px var(--primary-color);
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.modal-btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: 15px;
+    border: none;
+    font-size: 16px;
+    font-weight: 900;
+    cursor: pointer;
+    font-family: var(--font-family);
+    transition: transform 0.2s;
+}
+
+.modal-btn:active {
+    transform: scale(0.96);
+}
+
+.modal-btn.cancel {
+    background-color: var(--btn-bg);
+    color: var(--text-dark);
+}
+
+.modal-btn.confirm {
+    background-color: var(--coming-green);
+    color: white;
+}
+
+/* ================= 響應式設計 ================= */
 @media (max-width: 500px) {
-    body {
-        padding: 0;
-        align-items: stretch;
-    }
-    .phone-mockup {
-        max-width: 100%;
-        width: 100%;
-        height: 100dvh;
-        border-radius: 0;
-        box-shadow: none;
-    }
-    .dynamic-island {
-        display: none;
-    }
-    .status-bar {
-        height: 20px;
-    }
-    #app-content {
-        padding: 5px 15px 20px;
-    }
+    body { padding: 0; align-items: stretch; }
+    .phone-mockup { max-width: 100%; width: 100%; height: 100dvh; border-radius: 0; box-shadow: none; }
+    .dynamic-island { display: none; }
+    .status-bar { height: 15px; }
+    #app-header { padding: 0 var(--spacing-md) var(--spacing-sm); }
+    #app-content { padding: var(--spacing-sm) var(--spacing-md); }
 }

@@ -1,37 +1,46 @@
+/* ================= 本週總覽 ================= */
 .weekly-header {
     background-color: var(--card-purple);
-    border-radius: 25px;
-    padding: 20px;
+    border-radius: 20px;
+    padding: 16px;
     text-align: center;
-    margin-bottom: 20px;
-    margin-top: 50px;
+    margin-bottom: 12px;
+    box-shadow: var(--card-shadow);
+    border: var(--card-border);
+    transition: background-color 0.3s ease;
 }
 
 .weekly-header .title {
-    font-size: 28px;
+    font-size: 22px;
     font-weight: 900;
     color: var(--text-dark);
 }
 
 .weekly-grid {
     overflow-x: auto;
-    padding-bottom: 30px;
+    padding-bottom: 12px;
+    -webkit-overflow-scrolling: touch;
 }
 
 .weekly-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 4px;
-    font-size: 11px;
+    table-layout: fixed;
 }
 
 .weekly-table th {
     background-color: var(--card-purple);
     color: var(--text-dark);
-    padding: 8px 4px;
+    padding: 7px 4px;
     border-radius: 8px;
     font-weight: 900;
-    font-size: 12px;
+    font-size: 11px;
+    box-shadow: var(--card-shadow);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .weekly-table td {
@@ -41,32 +50,204 @@
     border-radius: 8px;
     text-align: center;
     vertical-align: middle;
-    min-width: 45px;
+    box-shadow: var(--card-shadow);
+    width: 46px;
+    height: 56px;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
+/* 第 1 欄（節次） */
 .weekly-table .period-cell {
     background-color: var(--btn-bg);
     font-weight: 900;
-    font-size: 11px;
+    font-size: 10px;
+    padding: 5px 3px;
+    box-shadow: none;
+    width: 40px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
+/* 空格子 */
 .weekly-table .empty-cell {
     background-color: transparent;
     color: var(--text-muted);
+    box-shadow: none;
 }
 
+/* 每個格子內部用 Flexbox 上下居中 */
+.weekly-table td .cell-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* 科目名稱：固定 13px / bold / 最多 2 行 */
 .mini-subject {
+    font-size: 13px;
     font-weight: 900;
-    font-size: 12px;
-    line-height: 1.1;
+    line-height: 1.15;
+    color: var(--text-dark);
+    cursor: pointer;
+    text-decoration: underline;
+    transition: opacity 0.2s;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    text-align: center;
 }
 
-.mini-subject.long-text {
-    font-size: 9px;
+.mini-subject:active {
+    opacity: 0.6;
 }
 
+/* 老師名字：固定 10px / regular / 最多 2 行 */
 .mini-teacher {
-    font-size: 9px;
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 1.15;
     color: var(--text-muted);
-    margin-top: 2px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    text-align: center;
+}
+
+.mini-teacher:active {
+    opacity: 0.6;
+}
+
+/* 超長科目名稱：保持 13px 但允許省略 */
+.mini-subject.long-text {
+    font-size: 13px;
+}
+
+/* 資訊彈窗（保留原本） */
+.info-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: modalFadeIn 0.2s ease;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.info-modal-content {
+    background-color: var(--bg-color);
+    border-radius: 25px;
+    width: 100%;
+    max-width: 380px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 20px;
+    animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalSlideUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.info-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.info-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--text-main);
+}
+
+.info-modal-icon { font-size: 24px; }
+
+.info-modal-close {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    color: var(--text-main);
+    font-size: 16px;
+    font-weight: 900;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.info-modal-close:active {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.info-modal-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.info-modal-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.info-modal-item {
+    background-color: var(--card-purple);
+    border-radius: 15px;
+    padding: 12px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.info-modal-item-day {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 700;
+}
+
+.info-modal-item-subject {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--text-dark);
+}
+
+.info-modal-item-time {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
 }

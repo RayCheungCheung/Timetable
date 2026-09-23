@@ -1,21 +1,23 @@
 .schedule-header {
     background-color: var(--card-purple);
-    border-radius: 25px;
-    padding: 20px;
+    border-radius: 20px;
+    padding: 16px;
     text-align: center;
-    margin-bottom: 20px;
-    margin-top: 50px;
+    margin-bottom: 12px;
+    box-shadow: var(--card-shadow);
+    border: var(--card-border);
+    transition: background-color 0.3s ease;
 }
 
 .schedule-header .title {
-    font-size: 32px;
+    font-size: 24px;
     font-weight: 900;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
     color: var(--text-dark);
 }
 
 .schedule-header .date {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text-muted);
     font-weight: 600;
 }
@@ -23,6 +25,6 @@
 .schedule-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding-bottom: 20px;
+    gap: 10px;
+    padding-bottom: 12px;
 }

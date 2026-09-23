@@ -1,67 +1,191 @@
 // ================= 全域變數 =================
 let scheduleData = {};
 let holidaysData = [];
+let scheduleLoadFailed = false;
+let scheduleLoadFailedUrl = '';
+let scheduleLoadFailedReason = '';
 const dayNames = ["日", "一", "二", "三", "四", "五", "六"];
+let currentTab = 'page-realtime';
 
 // ================= 初始化 =================
 async function initApp() {
+    await showSplashScreen();
+
     try {
-        const response = await fetch('data/schedule.json');
-        scheduleData = await response.json();
-
-        try {
-            const holidayResponse = await fetch('data/holidays.json');
-            const holidayData = await holidayResponse.json();
-            holidaysData = holidayData.holidays || [];
-        } catch (e) {
-            console.warn('載入假期資料失敗:', e);
-            holidaysData = [];
+        const scheduleUrl = appUrl('data/schedule.json');
+        scheduleLoadFailedUrl = scheduleUrl;
+        const response = await fetch(scheduleUrl, { cache: 'no-store' });
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status} ${response.statusText}`);
         }
-
-        initTheme();
-        initSearch();
-        initCardExpand();
-
-        renderWeeklyGrid();
-        renderHolidays();
-
-        switchPage('page-menu');
-
-        setInterval(() => {
-            if (document.getElementById('page-realtime').classList.contains('active')) {
-                updateRealtimeStatus();
-            }
-        }, 1000);
+        // 靜態主機／代理有時會回傳 200 但內容係 HTML（404 頁、登入頁），要分開講清楚
+        const raw = await response.text();
+        try {
+            scheduleData = JSON.parse(raw);
+        } catch (parseError) {
+            throw new Error('伺服器回傳嘅唔係 JSON（可能係 404 頁面或被攔截），請對照下面嘅網址');
+        }
     } catch (error) {
-        console.error("載入課表失敗:", error);
-        document.getElementById('app-content').innerHTML =
-            `<div style="color: #ff3b30; text-align: center; padding: 50px; font-size: 18px;">
-                載入課表失敗，請確認 data/schedule.json 是否存在。
-            </div>`;
+        console.error('載入課表失敗:', error);
+        scheduleLoadFailed = true;
+        scheduleLoadFailedReason = error && error.message ? error.message : String(error);
+        scheduleData = {};
     }
+
+    try {
+        const holidayResponse = await fetch(appUrl('data/holidays.json'));
+        const holidayData = await holidayResponse.json();
+        holidaysData = holidayData.holidays || [];
+    } catch (e) {
+        console.warn('載入假期資料失敗:', e);
+        holidaysData = [];
+    }
+
+    initTheme();
+    initSearch();
+    initCardExpand();
+    initCalendar();
+
+    renderWeeklyGrid();
+    renderHolidays();
+
+    if (scheduleLoadFailed) {
+        renderScheduleLoadError();
+    }
+
+    switchTab('page-realtime');
+
+    // 等 DOM 渲染完成後，初始化選中塊位置
+    setTimeout(initNavIndicator, 150);
+    window.addEventListener('resize', initNavIndicator);
+
+    setInterval(() => {
+        if (document.getElementById('page-realtime').classList.contains('active')) {
+            updateRealtimeStatus();
+        }
+    }, 1000);
 }
 
-// ================= 頁面切換 =================
-function switchPage(pageId, mode = 'tomorrow') {
-    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-    const targetPage = document.getElementById(pageId);
-    targetPage.classList.add('active');
+// ================= 課表載入失敗提示 =================
+function renderScheduleLoadError() {
+    const container = document.getElementById('status-container');
+    if (!container) return;
 
-    if (typeof animatePageEnter === 'function') animatePageEnter(targetPage);
+    // file:// 直接開檔時，瀏覽器基於安全性會封鎖 fetch 本機檔案
+    const isFileProtocol = location.protocol === 'file:';
+    const reason = isFileProtocol
+        ? '偵測到你係直接打開 index.html，瀏覽器唔准 file:// 用 fetch 讀取本機 JSON。'
+        : `讀唔到課表檔案：${scheduleLoadFailedReason}`;
+    const action = isFileProtocol
+        ? '請用本機伺服器開啟（VS Code Live Server，或喺資料夾執行 python -m http.server）'
+        : '請確認伺服器上面有 data/schedule.json，之後用 Ctrl + Shift + R 強制重新整理';
+    // 顯示實際請求嘅網址，方便喺 GitHub Pages 對照係邊一段路徑出錯
+    const debugLine = isFileProtocol
+        ? ''
+        : `<div class="teacher" style="word-break: break-all;">網址：${scheduleLoadFailedUrl}</div>`;
 
-    if (pageId === 'page-schedule') {
-        renderSchedule(mode);
-        const backBtn = document.getElementById('schedule-back-btn');
-        if (mode === 'today') {
-            backBtn.onclick = () => switchPage('page-realtime');
-        } else {
-            backBtn.onclick = () => switchPage('page-menu');
+    container.innerHTML = `
+        <div class="status-card now">
+            <div class="status-header">
+                <div>ERROR</div>
+            </div>
+            <div class="status-body">
+                <div class="subject long-text">載入課表失敗</div>
+                <div class="teacher">${reason}</div>
+                ${debugLine}
+                <div class="time-range">${action}</div>
+            </div>
+        </div>
+    `;
+}
+
+// ================= Splash Screen 控制 =================
+function showSplashScreen() {
+    return new Promise((resolve) => {
+        const splash = document.getElementById('splash-screen');
+        if (!splash) {
+            resolve();
+            return;
         }
+
+        setTimeout(() => {
+            splash.classList.add('hidden');
+            setTimeout(() => {
+                splash.classList.add('removed');
+                setTimeout(() => {
+                    if (splash.parentNode) {
+                        splash.parentNode.removeChild(splash);
+                    }
+                    resolve();
+                }, 100);
+            }, 300);
+        }, 1200);
+    });
+}
+
+// ================= Tab 切換（Liquid Glass 版） =================
+function switchTab(pageId) {
+    const navItems = document.querySelectorAll('.nav-item');
+    const indicator = document.getElementById('nav-indicator');
+
+    let activeIndex = -1;
+
+    navItems.forEach((item, index) => {
+        const isActive = item.dataset.tab === pageId;
+        item.classList.toggle('active', isActive);
+        if (isActive) activeIndex = index;
+    });
+
+    if (indicator && activeIndex !== -1 && navItems[activeIndex]) {
+        const targetItem = navItems[activeIndex];
+        const capsule = targetItem.parentElement;
+        const capsuleRect = capsule.getBoundingClientRect();
+        const itemRect = targetItem.getBoundingClientRect();
+
+        const offsetLeft = itemRect.left - capsuleRect.left;
+        const itemWidth = itemRect.width;
+        const indicatorWidth = Math.max(itemWidth - 8, 56);
+
+        indicator.classList.add('is-sliding');
+
+        indicator.style.width = `${indicatorWidth}px`;
+        indicator.style.transform = `translateX(${offsetLeft + 4}px)`;
+
+        clearTimeout(indicator._slideTimer);
+        indicator._slideTimer = setTimeout(() => {
+            indicator.classList.remove('is-sliding');
+        }, 500);
     }
 
+    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) targetPage.classList.add('active');
+
+    currentTab = pageId;
+
+    if (pageId === 'page-schedule') renderSchedule('tomorrow');
     if (pageId === 'page-realtime') updateRealtimeStatus();
     if (pageId === 'page-weekly') renderWeeklyGrid();
+    if (pageId === 'page-calendar') renderCalendar();
     if (pageId === 'page-holidays') renderHolidays();
+}
+
+// ================= 初始化選中塊位置 =================
+function initNavIndicator() {
+    const activeItem = document.querySelector('.nav-item.active');
+    const indicator = document.getElementById('nav-indicator');
+    if (!activeItem || !indicator) return;
+
+    const capsule = activeItem.parentElement;
+    const capsuleRect = capsule.getBoundingClientRect();
+    const itemRect = activeItem.getBoundingClientRect();
+
+    const offsetLeft = itemRect.left - capsuleRect.left;
+    const itemWidth = itemRect.width;
+    const indicatorWidth = Math.max(itemWidth - 8, 56);
+
+    indicator.style.width = `${indicatorWidth}px`;
+    indicator.style.transform = `translateX(${offsetLeft + 4}px)`;
 }
 
 // ================= 渲染課表 =================
@@ -124,6 +248,9 @@ function updateRealtimeStatus() {
     const ss = String(now.getSeconds()).padStart(2, '0');
     document.getElementById('live-clock').textContent = `${hh}:${mm}:${ss}`;
 
+    // 課表載入失敗時，保留錯誤提示卡，唔好用空資料覆蓋
+    if (scheduleLoadFailed) return;
+
     const currentDay = now.getDay();
     const currentClasses = scheduleData[currentDay] || [];
     const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
@@ -146,9 +273,8 @@ function updateRealtimeStatus() {
         }
     }
 
-    // 午休：12:15 ~ 14:10（改咗做 14:10）
-    const lunchStartSeconds = 12 * 3600 + 15 * 60;  // 12:15
-    const lunchEndSeconds = 14 * 3600 + 10 * 60;    // 14:10（改咗）
+    const lunchStartSeconds = 12 * 3600 + 15 * 60;
+    const lunchEndSeconds = 14 * 3600 + 10 * 60;
     const isLunch = currentSeconds >= lunchStartSeconds && currentSeconds < lunchEndSeconds;
 
     const schoolEndSeconds = 15 * 3600 + 45 * 60;
@@ -157,7 +283,6 @@ function updateRealtimeStatus() {
     const container = document.getElementById('status-container');
     let html = '';
 
-    // ================= 處理 NOW 區塊 =================
     if (isLunch) {
         const isSaturday = currentDay === 6;
 
@@ -179,8 +304,8 @@ function updateRealtimeStatus() {
                 </div>
             `;
         } else {
-            const faceStartSeconds = 13 * 3600 + 30 * 60; // 13:30
-            const faceEndSeconds = 14 * 3600 + 5 * 60;    // 14:05
+            const faceStartSeconds = 13 * 3600 + 30 * 60;
+            const faceEndSeconds = 14 * 3600 + 5 * 60;
 
             if (currentSeconds < faceStartSeconds) {
                 const remaining = faceStartSeconds - currentSeconds;
@@ -202,13 +327,9 @@ function updateRealtimeStatus() {
             } else if (currentSeconds >= faceStartSeconds && currentSeconds < faceEndSeconds) {
                 const remaining = faceEndSeconds - currentSeconds;
                 const lunchRemaining = lunchEndSeconds - currentSeconds;
-
-                let timeRangeText = '';
-                if (lunchRemaining > 0) {
-                    timeRangeText = `距離午休完結 ${formatTime(lunchRemaining)}`;
-                } else {
-                    timeRangeText = `午休已完結`;
-                }
+                let timeRangeText = lunchRemaining > 0
+                    ? `距離午休完結 ${formatTime(lunchRemaining)}`
+                    : `午休已完結`;
 
                 html += `
                     <div class="status-card now">
@@ -226,7 +347,6 @@ function updateRealtimeStatus() {
                     </div>
                 `;
             } else {
-                // 14:05 ~ 14:10：午休尾段
                 const remainingSeconds = lunchEndSeconds - currentSeconds;
                 html += `
                     <div class="status-card now">
@@ -265,22 +385,30 @@ function updateRealtimeStatus() {
         `;
     } else if (isAfterSchool) {
         html += `
-            <div class="status-card now" style="background-color: #333;">
-                <div class="status-header" style="background-color: #555;">
+            <div class="status-card now dismissed">
+                <div class="status-header">
                     <div>NOW</div>
                     <div class="countdown">
                         <div class="countdown-label">狀態</div>
                         <div class="countdown-number">放學</div>
                     </div>
                 </div>
-                <div class="status-body" style="background-color: #2c2c2e;">
-                    <div class="subject" style="font-size: 28px;">已放學 🎉</div>
-                    <div class="time-range" style="background-color: #555;">15:45 下課</div>
+                <div class="status-body">
+                    <div class="subject dismissed-subject">已放學 🎉</div>
+                    <div class="time-range dismissed-time">15:45 下課</div>
                 </div>
             </div>
         `;
     } else if (!currentSubject) {
-        const lastClassEnd = currentIndex >= 0 ? currentClasses[currentIndex].end : "";
+        // 小休時段：取最近一堂已完結課堂嘅結束時間做開始時間
+        let lastClassEnd = "";
+        for (let i = 0; i < currentClasses.length; i++) {
+            const cls = currentClasses[i];
+            const [endH, endM] = cls.end.split(':').map(Number);
+            if (endH * 3600 + endM * 60 <= currentSeconds) {
+                lastClassEnd = cls.end;
+            }
+        }
         let nextSubject = null;
         for (let i = 0; i < currentClasses.length; i++) {
             const cls = currentClasses[i];
@@ -328,7 +456,6 @@ function updateRealtimeStatus() {
         }
     }
 
-    // ================= 處理 Coming Up 區塊 =================
     if (!isAfterSchool) {
         if (isLunch) {
             let afternoonSubject = null;
@@ -428,7 +555,6 @@ function updateRealtimeStatus() {
         }
     }
 
-    // ================= 只更新數字，唔重建整個卡片（防止閃爍） =================
     const existingNowCard = container.querySelector('.status-card.now');
     const existingComingCard = container.querySelector('.status-card.coming');
 
@@ -442,13 +568,12 @@ function updateRealtimeStatus() {
     const nowCardHeader = existingNowCard ? existingNowCard.querySelector('.countdown-label')?.textContent || '' : '';
     const newNowCardHeader = newNowCard ? newNowCard.querySelector('.countdown-label')?.textContent || '' : '';
 
-    const needRebuild = 
-        !existingNowCard || 
-        !newNowCard ||
+    const needRebuild =
+        !existingNowCard || !newNowCard ||
         nowCardType !== newNowCardType ||
         nowCardHeader !== newNowCardHeader ||
         (existingComingCard === null) !== (newComingCard === null) ||
-        (existingComingCard && newComingCard && 
+        (existingComingCard && newComingCard &&
             (existingComingCard.querySelector('.subject')?.textContent || '') !== (newComingCard.querySelector('.subject')?.textContent || ''));
 
     if (needRebuild) {
@@ -575,7 +700,10 @@ function searchByDate(date) {
         return dateStr >= h.date && dateStr <= h.endDate;
     });
 
-    if (matchedHolidays.length > 0) {
+    const isSunday = dayOfWeek === 0;
+    const isHoliday = matchedHolidays.length > 0;
+
+    if (isHoliday) {
         matchedHolidays.forEach(h => {
             results.push({
                 html: `
@@ -588,18 +716,20 @@ function searchByDate(date) {
                 `
             });
         });
+        return results;
     }
 
-    if (dayOfWeek === 0 || dayOfWeek === 6) {
+    if (isSunday) {
         results.push({
             html: `
                 <div class="search-item">
-                    <div class="search-day">📅 ${dateStr}（星期${dayNames[dayOfWeek]}）</div>
-                    <div class="search-subject">週末</div>
+                    <div class="search-day">📅 ${dateStr}（週日）</div>
+                    <div class="search-subject">週日</div>
                     <div class="search-info">放假一天</div>
                 </div>
             `
         });
+        return results;
     }
 
     const classes = scheduleData[dayOfWeek] || [];
@@ -615,9 +745,7 @@ function searchByDate(date) {
                 `
             });
         });
-    }
-
-    if (results.length === 0) {
+    } else {
         results.push({
             html: `
                 <div class="search-item">

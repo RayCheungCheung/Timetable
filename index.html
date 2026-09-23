@@ -4,7 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>我的課表 - 初二正</title>
-    
+
+    <!-- 部署路徑修正：必須放喺所有 link / script 之前 -->
+    <script>
+    (function () {
+        // 問題 1：GitHub Pages 等靜態主機如果用「無結尾斜線」嘅資料夾網址開啟，
+        // 相對路徑會少算一層，令 CSS / JS / JSON 全部 404（本機開反而正常）。
+        // 解決：即時補一個 <base>，之後所有相對路徑都用返正確目錄。
+        var path = location.pathname;
+        if (!/\.html?$/i.test(path) && !/\/$/.test(path)) {
+            var base = document.createElement('base');
+            base.href = path + '/';
+            document.head.appendChild(base);
+        }
+
+        // 問題 2：所有模組共用同一個路徑工具讀 JSON，避免各自計錯相對路徑。
+        window.appUrl = function (relativePath) {
+            return new URL(String(relativePath).replace(/^\.?\//, ''), document.baseURI).href;
+        };
+    })();
+    </script>
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#b0b5d1">
@@ -254,7 +274,11 @@
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('service-worker.js')
-            .then((registration) => console.log('Service Worker 註冊成功:', registration.scope))
+            .then((registration) => {
+                console.log('Service Worker 註冊成功:', registration.scope);
+                // 主動檢查有無新版本，避免一直派舊快取
+                registration.update();
+            })
             .catch((error) => console.log('Service Worker 註冊失敗:', error));
     });
 }

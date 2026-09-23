@@ -1,5 +1,5 @@
 // ================= Service Worker =================
-const CACHE_NAME = 'timetable-v1.3.1';
+const CACHE_NAME = 'timetable-v1.4.0';
 const urlsToCache = [
     './',
     './index.html',
@@ -41,11 +41,12 @@ const urlsToCache = [
 ];
 
 // 安裝：快取所有檔案
+// 用 allSettled：只要有一個檔案 404（例如部署時漏咗上傳），都唔會令整個 SW 安裝失敗
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             console.log('已開啟快取');
-            return cache.addAll(urlsToCache);
+            return Promise.allSettled(urlsToCache.map((url) => cache.add(url)));
         })
     );
     self.skipWaiting();
@@ -73,8 +74,9 @@ self.addEventListener('fetch', (event) => {
     const request = event.request;
     if (request.method !== 'GET') return;
 
-    // 只處理同源請求
-    if (new URL(request.url).origin !== self.location.origin) return;
+    // 只處理本專案 scope 內嘅請求
+    // GitHub Pages 同一個 username.github.io 之下可能有多個專案／其他 SW，唔可以撈過界
+    if (!request.url.startsWith(self.registration.scope)) return;
 
     event.respondWith(
         fetch(request).then((response) => {

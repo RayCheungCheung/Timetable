@@ -1,11 +1,19 @@
 :root[data-theme="dark"], :root:not([data-theme]) {
     --bg-color: #1a1a1a;
+    --bg-secondary: #2c2c2e;
     --text-main: #ffffff;
     --text-dark: #1a1a1a;
-    --text-muted: #666666;
+    --text-muted: #8E8E93;
     --card-purple: #b0b5d1;
     --card-purple-dark: #a0a5c1;
+    --card-shadow: none;
+    --card-border: none;
     --btn-bg: #d1d5e6;
+    --btn-text: #1a1a1a;
     --now-red: #ff3b30;
+    --now-red-dark: #d32f2f;
     --coming-green: #34c759;
+    --coming-green-dark: #2e7d32;
+    --primary-color: #0A84FF;
+    --divider-color: rgba(255, 255, 255, 0.1);
 }

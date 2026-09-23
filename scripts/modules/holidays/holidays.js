@@ -3,7 +3,7 @@ async function renderHolidays() {
     if (!container) return;
     
     try {
-        const response = await fetch('data/holidays.json');
+        const response = await fetch(appUrl('data/holidays.json'));
         const data = await response.json();
         
         const now = new Date();
