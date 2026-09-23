@@ -7,21 +7,16 @@
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
-    
-    <!-- PWA 主題色 -->
     <meta name="theme-color" content="#b0b5d1">
-    
-    <!-- iOS 支援 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="我的課表">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
-    
-    <!-- 一般 favicon -->
     <link rel="icon" type="image/png" href="assets/icons/icon-192.png">
     
     <!-- 樣式表 -->
     <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/splash.css">
     <link rel="stylesheet" href="styles/themes/dark.css">
     <link rel="stylesheet" href="styles/themes/light.css">
     <link rel="stylesheet" href="styles/components/cards.css">
@@ -36,45 +31,60 @@
     <link rel="stylesheet" href="scripts/modules/holidays/holidays.css">
     <link rel="stylesheet" href="scripts/modules/expand/expand.css">
     <link rel="stylesheet" href="scripts/modules/calendar/calendar.css">
-    <link rel="stylesheet" href="scripts/modules/homework/homework.css">
 </head>
 <body>
+
+<!-- ================= Splash Screen ================= -->
+<div id="splash-screen">
+    <div class="splash-logo">
+        <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 80 130 L 80 400 Q 80 420 100 420 L 240 420 L 240 150 Q 240 130 220 130 L 100 130 Q 80 130 80 130 Z" 
+                  fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linejoin="round"/>
+            <path d="M 432 130 L 432 400 Q 432 420 412 420 L 272 420 L 272 150 Q 272 130 292 130 L 412 130 Q 432 130 432 130 Z" 
+                  fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linejoin="round"/>
+            <line x1="120" y1="200" x2="220" y2="200" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round"/>
+            <line x1="120" y1="250" x2="220" y2="250" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round"/>
+            <line x1="120" y1="300" x2="220" y2="300" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round"/>
+            <line x1="292" y1="200" x2="392" y2="200" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round"/>
+            <line x1="292" y1="250" x2="392" y2="250" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round"/>
+            <line x1="292" y1="300" x2="392" y2="300" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round"/>
+            <line x1="256" y1="150" x2="256" y2="420" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round"/>
+            <path d="M 60 420 L 452 420" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round"/>
+            <path d="M 236 420 L 236 450 Q 236 460 246 460 L 266 460 Q 276 460 276 450 L 276 420" 
+                  fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linejoin="round"/>
+        </svg>
+    </div>
+</div>
 
 <div class="phone-mockup">
     <div class="dynamic-island"></div>
     <div class="status-bar"></div>
 
+    <!-- 頂部 Header -->
+    <div id="app-header">
+        <div class="header-top">
+            <div class="header-title" id="header-title">我的課表</div>
+            <button class="theme-toggle-corner" id="theme-toggle" onclick="toggleTheme()">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="🔍 搜尋科目、老師或日期...">
+            <div id="search-results" class="search-results"></div>
+        </div>
+    </div>
+
+    <!-- 主內容區域 -->
     <div id="app-content">
         
-        <!-- 頁面 1：首頁選單 -->
-        <div id="page-menu" class="page active">
-            <button class="theme-toggle-corner" id="theme-toggle" onclick="toggleTheme()">🌙</button>
-            
-            <div class="menu-title">
-                <div class="sub">我的課表</div>
-                <div class="main">請選擇模式</div>
+        <div id="page-weekly" class="page">
+            <div class="weekly-header">
+                <div class="title">本週課表總覽</div>
             </div>
-            
-            <div class="search-container">
-                <input type="text" id="search-input" placeholder="🔍 搜尋科目、老師或日期...">
-                <div id="search-results" class="search-results"></div>
-            </div>
-            
-            <div class="menu-cards">
-                <button class="menu-btn" onclick="switchPage('page-schedule', 'tomorrow')">📅 明天課表預測</button>
-                <button class="menu-btn" onclick="switchPage('page-realtime')">⏱️ 上/下課倒數</button>
-                <button class="menu-btn" onclick="switchPage('page-weekly')">📊 本週課表總覽</button>
-                <button class="menu-btn" onclick="switchPage('page-holidays')">🎉 下一個假期倒數</button>
-                <button class="menu-btn" onclick="switchPage('page-calendar')">📅 月曆</button>
-                <button class="menu-btn" onclick="switchPage('page-homework')">📚 測驗 / 作業倒數</button>
-            </div>
-            
-            <div class="footer">© Ray Cheung</div>
+            <div class="weekly-grid" id="weekly-grid-container"></div>
         </div>
 
-        <!-- 頁面 2：課表 -->
         <div id="page-schedule" class="page">
-            <button class="back-btn" id="schedule-back-btn" onclick="switchPage('page-menu')">◀ 返回</button>
             <div class="schedule-header">
                 <div class="title" id="schedule-title-text">明日課表</div>
                 <div class="date" id="schedule-date-text">載入中...</div>
@@ -82,90 +92,150 @@
             <div class="schedule-list" id="schedule-list-container"></div>
         </div>
 
-        <!-- 頁面 3：即時倒數 -->
-        <div id="page-realtime" class="page">
-            <button class="back-btn" onclick="switchPage('page-menu')">◀ 返回</button>
+        <div id="page-realtime" class="page active">
             <div class="realtime-clock">
                 <div class="label">即時時間</div>
                 <div class="time" id="live-clock">00:00:00</div>
                 <div class="utc">UTC+8</div>
             </div>
             <div class="status-container" id="status-container"></div>
-            <button class="view-full-btn" onclick="switchPage('page-schedule', 'today')">查看原整課表</button>
-            <div class="footer">© Ray Cheung</div>
         </div>
 
-        <!-- 頁面 4：本週總覽 -->
-        <div id="page-weekly" class="page">
-            <button class="back-btn" onclick="switchPage('page-menu')">◀ 返回</button>
-            <div class="weekly-header">
-                <div class="title">本週課表總覽</div>
-            </div>
-            <div class="weekly-grid" id="weekly-grid-container"></div>
-        </div>
-
-        <!-- 頁面 5：假期倒數 -->
         <div id="page-holidays" class="page">
-            <button class="back-btn" onclick="switchPage('page-menu')">◀ 返回</button>
             <div class="holidays-header">
                 <div class="title">下一個假期</div>
             </div>
             <div class="holidays-container" id="holidays-container"></div>
         </div>
 
-        <!-- 頁面 6：月曆 -->
         <div id="page-calendar" class="page">
-            <button class="back-btn" onclick="switchPage('page-menu')">◀ 返回</button>
-
             <div class="cal-toolbar">
                 <button class="cal-today-btn" onclick="goToCalendarToday()">今天</button>
                 <button class="cal-nav-btn" onclick="changeCalendarMonth(-1)">‹</button>
                 <button class="cal-nav-btn" onclick="changeCalendarMonth(1)">›</button>
                 <div class="cal-title" id="calendar-title">2026年9月</div>
-                <button class="cal-add-btn" onclick="openAddCalendarEventModal()">＋</button>
             </div>
-
             <div class="cal-weekdays">
                 <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
             </div>
-
             <div class="cal-grid" id="calendar-grid"></div>
-
             <div class="cal-day-events">
                 <div class="cal-day-title" id="calendar-events-title">今日事件</div>
                 <div class="cal-day-list" id="calendar-events-list"></div>
             </div>
         </div>
 
-        <!-- 頁面 7：測驗 / 作業倒數 -->
-        <div id="page-homework" class="page">
-            <button class="back-btn" onclick="switchPage('page-menu')">◀ 返回</button>
-            <div class="hw-header">
-                <div class="title">測驗 / 作業倒數</div>
-            </div>
-            <div class="hw-container" id="homework-container"></div>
-            <div class="footer">© Ray Cheung</div>
-        </div>
-
     </div>
+
+    <!-- 底部導航欄（Liquid Glass Floating Capsule） -->
+    <nav id="bottom-nav">
+        <div class="nav-capsule">
+            <div class="nav-indicator" id="nav-indicator"></div>
+
+            <button class="nav-item active" data-tab="page-weekly" onclick="switchTab('page-weekly')">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">週覽</span>
+            </button>
+            <button class="nav-item" data-tab="page-schedule" onclick="switchTab('page-schedule')">
+                <span class="nav-icon">📅</span>
+                <span class="nav-label">課表</span>
+            </button>
+            <button class="nav-item" data-tab="page-realtime" onclick="switchTab('page-realtime')">
+                <span class="nav-icon">⏱️</span>
+                <span class="nav-label">倒數</span>
+            </button>
+            <button class="nav-item" data-tab="page-holidays" onclick="switchTab('page-holidays')">
+                <span class="nav-icon">🎉</span>
+                <span class="nav-label">假期</span>
+            </button>
+            <button class="nav-item" data-tab="page-calendar" onclick="switchTab('page-calendar')">
+                <span class="nav-icon">🗓️</span>
+                <span class="nav-label">月曆</span>
+            </button>
+        </div>
+    </nav>
+
 </div>
 
-<!-- 新增事件彈窗（月曆用，放喺 .phone-mockup 外面） -->
-<div class="modal-overlay" id="add-calendar-event-modal">
-    <div class="modal-content">
-        <div class="modal-title">新增事件</div>
-        <input type="date" id="calendar-event-date" class="modal-input">
-        <input type="text" id="calendar-event-title" class="modal-input" placeholder="事件名稱（例如：數學測驗）">
-        <select id="calendar-event-type" class="modal-input">
-            <option value="exam">📝 測驗 / 考試</option>
-            <option value="homework">📚 作業截止</option>
-            <option value="activity">🎯 活動</option>
-            <option value="holiday">🎉 假期</option>
-        </select>
-        <div class="modal-buttons">
-            <button class="modal-btn cancel" onclick="closeAddCalendarEventModal()">取消</button>
-            <button class="modal-btn confirm" onclick="saveCalendarEvent()">儲存</button>
+<!-- 新增事件彈窗（Google Calendar 風格，喺 .phone-mockup 外面） -->
+<div class="gcal-modal-overlay" id="add-calendar-event-modal" onclick="closeAddCalendarEventModal(event)">
+    <div class="gcal-modal" onclick="event.stopPropagation()">
+
+        <div class="gcal-modal-header">
+            <div class="gcal-drag-handle"></div>
+            <button class="gcal-close-btn" onclick="closeAddCalendarEventModal()" aria-label="關閉">✕</button>
         </div>
+
+        <div class="gcal-title-section">
+            <input type="text" id="calendar-event-title" class="gcal-title-input" placeholder="新增標題與時間">
+            <div class="gcal-title-underline"></div>
+        </div>
+
+        <div class="gcal-type-pills">
+            <button class="gcal-pill active" data-type="exam" onclick="selectEventType('exam')">
+                <span class="gcal-pill-icon">📝</span> 事件
+            </button>
+            <button class="gcal-pill" data-type="homework" onclick="selectEventType('homework')">
+                <span class="gcal-pill-icon">📚</span> 任務
+            </button>
+        </div>
+
+        <div class="gcal-options-list">
+
+            <div class="gcal-option-item">
+                <div class="gcal-option-icon">🕒</div>
+                <div class="gcal-option-content">
+                    <input type="date" id="calendar-event-date" class="gcal-date-input">
+                    <div class="gcal-option-subtitle" id="gcal-date-display">選擇日期</div>
+                </div>
+                <button class="gcal-add-time-btn">Add time</button>
+            </div>
+
+            <div class="gcal-option-item gcal-option-disabled">
+                <div class="gcal-option-icon">👥</div>
+                <div class="gcal-option-content">
+                    <div class="gcal-option-title">新增參與者</div>
+                </div>
+            </div>
+
+            <div class="gcal-option-item gcal-option-disabled">
+                <div class="gcal-option-icon">📹</div>
+                <div class="gcal-option-content">
+                    <div class="gcal-option-title">新增視訊會議</div>
+                </div>
+            </div>
+
+            <div class="gcal-option-item gcal-option-disabled">
+                <div class="gcal-option-icon">📍</div>
+                <div class="gcal-option-content">
+                    <div class="gcal-option-title">新增地點</div>
+                </div>
+            </div>
+
+            <div class="gcal-option-item gcal-option-disabled">
+                <div class="gcal-option-icon">≡</div>
+                <div class="gcal-option-content">
+                    <div class="gcal-option-title">新增描述或附件</div>
+                </div>
+            </div>
+
+            <div class="gcal-option-item gcal-option-disabled">
+                <div class="gcal-option-icon">📅</div>
+                <div class="gcal-option-content">
+                    <div class="gcal-option-title">我的課表</div>
+                    <div class="gcal-option-subtitle">預設提醒：準時</div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="gcal-footer">
+            <button class="gcal-more-btn">更多選項</button>
+            <button class="gcal-save-btn" onclick="saveCalendarEvent()">儲存</button>
+        </div>
+
+        <input type="hidden" id="calendar-event-type" value="exam">
+
     </div>
 </div>
 
@@ -178,20 +248,14 @@
 <script src="scripts/modules/animations/animations.js"></script>
 <script src="scripts/modules/expand/expand.js"></script>
 <script src="scripts/modules/calendar/calendar.js"></script>
-<script src="scripts/modules/homework/homework.js"></script>
 <script src="scripts/main.js"></script>
 
-<!-- 註冊 Service Worker -->
 <script>
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/Timetable/service-worker.js')
-            .then((registration) => {
-                console.log('Service Worker 註冊成功:', registration.scope);
-            })
-            .catch((error) => {
-                console.log('Service Worker 註冊失敗:', error);
-            });
+            .then((registration) => console.log('Service Worker 註冊成功:', registration.scope))
+            .catch((error) => console.log('Service Worker 註冊失敗:', error));
     });
 }
 </script>
