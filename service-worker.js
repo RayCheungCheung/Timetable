@@ -1,5 +1,5 @@
 // ================= Service Worker =================
-const CACHE_NAME = 'timetable-v1.3.0';
+const CACHE_NAME = 'timetable-v1.3.1';
 const urlsToCache = [
     './',
     './index.html',
@@ -68,22 +68,30 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// 攔截請求：優先使用快取，然後更新
+// 攔截請求：網路優先（確保拎到最新版本），失敗時回退快取（離線仍可用）
 self.addEventListener('fetch', (event) => {
+    const request = event.request;
+    if (request.method !== 'GET') return;
+
+    // 只處理同源請求
+    if (new URL(request.url).origin !== self.location.origin) return;
+
     event.respondWith(
-        caches.match(event.request).then((response) => {
-            if (response) {
-                return response;
-            }
-            return fetch(event.request).then((response) => {
-                if (!response || response.status !== 200 || response.type !== 'basic') {
-                    return response;
-                }
+        fetch(request).then((response) => {
+            if (response && response.status === 200 && response.type === 'basic') {
                 const responseToCache = response.clone();
                 caches.open(CACHE_NAME).then((cache) => {
-                    cache.put(event.request, responseToCache);
+                    cache.put(request, responseToCache);
                 });
-                return response;
+            }
+            return response;
+        }).catch(() => {
+            return caches.match(request).then((cached) => {
+                if (cached) return cached;
+                if (request.mode === 'navigate') {
+                    return caches.match('./index.html');
+                }
+                return Response.error();
             });
         })
     );
