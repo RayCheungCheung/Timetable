@@ -4,50 +4,38 @@ let calendarEvents = [];
 let calendarSelectedDate = null;
 let selectedEventType = 'exam';
 
-const STORAGE_KEY = 'calendar_events';
+// 事件資料統一由 DataManager（DB 集合 'events'）管理：
+// localStorage（calendar_events）優先 → data/events.json → 空陣列
+const CALENDAR_DB_NAME = 'events';
 
 // ================= 初始化 =================
 async function initCalendar() {
-    loadEventsFromStorage();
+    await loadCalendarEvents();
 
-    if (calendarEvents.length === 0) {
-        try {
-            const response = await fetch(appUrl('data/events.json'));
-            const data = await response.json();
-            const defaultEvents = (data.events || []).map((e, index) => ({
-                id: `default-${index}-${e.date}`,
-                date: e.date,
-                title: e.title,
-                type: e.type || 'holiday',
-                emoji: e.emoji || '📅'
-            }));
-            calendarEvents = defaultEvents;
-            saveEventsToStorage();
-        } catch (e) {
-            console.warn('載入預設事件失敗:', e);
-        }
+    // 開發者面板改動事件後 → 即時重繪（Hot Reload）
+    if (typeof DB !== 'undefined') {
+        DB.subscribe(CALENDAR_DB_NAME, () => {
+            calendarEvents = DB.get(CALENDAR_DB_NAME) || [];
+            renderCalendar();
+        });
     }
 
     renderCalendar();
 }
 
-// ================= localStorage =================
-function loadEventsFromStorage() {
+async function loadCalendarEvents() {
     try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        calendarEvents = stored ? JSON.parse(stored) : [];
+        await DB.load(CALENDAR_DB_NAME);
+        calendarEvents = DB.get(CALENDAR_DB_NAME) || [];
     } catch (e) {
-        console.error('讀取 localStorage 失敗:', e);
+        console.warn('載入事件資料失敗:', e);
         calendarEvents = [];
     }
+    return calendarEvents;
 }
 
 function saveEventsToStorage() {
-    try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(calendarEvents));
-    } catch (e) {
-        console.error('寫入 localStorage 失敗:', e);
-    }
+    DB.set(CALENDAR_DB_NAME, calendarEvents);
 }
 
 // ================= 月份切換 =================
@@ -90,7 +78,9 @@ function renderCalendar() {
 
         let eventsHtml = '';
         dayEvents.slice(0, 2).forEach(e => {
-            eventsHtml += `<div class="cal-event ${e.type}">${e.emoji || ''} ${e.title}</div>`;
+            // 開發者自訂顏色（e.color）優先，否則用類別預設色
+            const colorStyle = dbIsHexColor(e.color) ? ` style="background-color:${e.color}"` : '';
+            eventsHtml += `<div class="cal-event ${e.type}"${colorStyle}>${contentIcon(e.emoji || e.icon, { size: 13, fallback: dbEventIcon(e.type) })}${escapeHtml(e.title)}</div>`;
         });
         if (dayEvents.length > 2) {
             eventsHtml += `<div class="cal-event more">+${dayEvents.length - 2}</div>`;
@@ -142,22 +132,29 @@ function selectCalendarDate(dateStr) {
         return;
     }
 
-    listEl.innerHTML = dayEvents.map(e => `
-        <div class="cal-event-item ${e.type}">
-            <div class="cal-event-emoji">${e.emoji || getCalEventEmoji(e.type)}</div>
+    listEl.innerHTML = dayEvents.map(e => {
+        const colorStyle = dbIsHexColor(e.color)
+            ? ` style="box-shadow: inset 3px 0 0 0 ${e.color}"`
+            : '';
+        const noteHtml = e.note ? `<div class="cal-event-note">${escapeHtml(e.note)}</div>` : '';
+        return `
+        <div class="cal-event-item ${e.type}"${colorStyle}>
+            <div class="cal-event-emoji">${contentIcon(e.emoji || e.icon, { size: 19, fallback: dbEventIcon(e.type) })}</div>
             <div class="cal-event-info">
-                <div class="cal-event-title">${e.title}</div>
+                <div class="cal-event-title">${escapeHtml(e.title)}</div>
                 <div class="cal-event-type">${getCalTypeName(e.type)}</div>
+                ${noteHtml}
             </div>
-            <button class="cal-event-delete" onclick="deleteCalendarEvent('${e.id}')" aria-label="刪除事件">✕</button>
+            <button class="cal-event-delete" onclick="deleteCalendarEvent('${e.id}')" aria-label="刪除事件">${icon('close', { size: 14 })}</button>
         </div>
-    `).join('');
+    `;
+    }).join('');
 }
 
 // ================= 輔助 =================
-function getCalEventEmoji(type) {
-    const emojis = { exam: '📝', homework: '📚', activity: '🎯', holiday: '🎉' };
-    return emojis[type] || '📌';
+// 事件類別的預設圖示名（實際 SVG 由 scripts/utils/icons.js 產生）
+function getCalEventIcon(type) {
+    return dbEventIcon(type);
 }
 
 function getCalTypeName(type) {
@@ -244,7 +241,7 @@ function saveCalendarEvent() {
         date: date,
         title: title,
         type: type,
-        emoji: getCalEventEmoji(type)
+        icon: getCalEventIcon(type)
     };
 
     calendarEvents.push(newEvent);

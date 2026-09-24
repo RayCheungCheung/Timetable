@@ -22,7 +22,7 @@ function renderHomework() {
     if (!container) return;
 
     if (homeworkData.length === 0) {
-        container.innerHTML = `<div class="hw-empty">暫時沒有測驗或作業 🎉</div>`;
+        container.innerHTML = `<div class="hw-empty">暫時沒有測驗或作業</div>`;
         return;
     }
 
@@ -51,7 +51,7 @@ function renderHomework() {
         } else if (diffDays === 0) {
             cardClass = 'urgent';
             countdownClass = 'urgent';
-            countdownText = '🎉';
+            countdownText = icon('clock', { size: 20 });
             countdownLabel = '今天';
         } else if (diffDays === 1) {
             cardClass = 'urgent';
@@ -104,17 +104,17 @@ function checkHomeworkReminders() {
         if (!reminded[key]) reminded[key] = {};
 
         if (diffDays === 3 && !reminded[key].day3) {
-            sendNotification('📚 測驗 / 作業提醒', `${hw.title} 將於 3 天後截止！`);
+            sendNotification('測驗 / 作業提醒', `${hw.title} 將於 3 天後截止！`);
             reminded[key].day3 = true;
             updated = true;
         }
         if (diffDays === 1 && !reminded[key].day1) {
-            sendNotification('📚 測驗 / 作業提醒', `${hw.title} 將於明天截止！`);
+            sendNotification('測驗 / 作業提醒', `${hw.title} 將於明天截止！`);
             reminded[key].day1 = true;
             updated = true;
         }
         if (diffDays === 0 && !reminded[key].day0) {
-            sendNotification('📚 測驗 / 作業提醒', `${hw.title} 就是今天截止！`);
+            sendNotification('測驗 / 作業提醒', `${hw.title} 就是今天截止！`);
             reminded[key].day0 = true;
             updated = true;
         }

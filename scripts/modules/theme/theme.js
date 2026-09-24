@@ -16,8 +16,9 @@ function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     const toggleBtn = document.getElementById('theme-toggle');
     if (toggleBtn) {
-        const icon = toggleBtn.querySelector('.theme-icon') || toggleBtn;
-        icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+        const iconHost = toggleBtn.querySelector('.theme-icon') || toggleBtn;
+        // 深色模式 → 極簡線條太陽；淺色模式 → 極簡線條彎月（SF Symbols 風格）
+        iconHost.innerHTML = icon(theme === 'dark' ? 'sun' : 'moon', { size: 20 });
     }
 }
 

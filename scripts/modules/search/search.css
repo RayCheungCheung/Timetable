@@ -1,7 +1,10 @@
 .search-container {
     width: 100%;
     max-width: 320px;
-    margin-bottom: 20px;
+    /* 搜尋框與第一張卡片之間只保留少量呼吸位；
+       其餘間距由 #app-header 底部內距與 #app-content 頂部內距提供，
+       避免加起來變成一大片空白 */
+    margin-bottom: 4px;
     position: relative;
 }
 
@@ -16,6 +19,14 @@
     color: #1a1a1a;
     font-family: var(--font-family);
     outline: none;
+}
+
+/* 輸入提示文字：底色 #d1d5e6 係寫死嘅淺灰，所以提示色都跟本檔嘅 #1a1a1a 加透明度，
+   而唔用 var(--text-muted)（深色主題會變得太淺、對比不足）。
+   註：呢條規則原本只存在於從未被 <link> 嘅 styles/pages/search.css，
+   該檔已刪除，規則在此生效。 */
+#search-input::placeholder {
+    color: rgba(26, 26, 26, 0.45);
 }
 
 .search-results {
