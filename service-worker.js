@@ -1,10 +1,19 @@
 // ================= Service Worker =================
-const CACHE_NAME = 'timetable-v1.4.0';
+// 版本號升級：2.6.0 → 2.7.0
+// 本次變更：
+//   1. 開頁初始化改為「先選班級」：首次開啟（localStorage 未有 user_class）
+//      唔會再預設顯示任何班級課表，改為顯示「請先選擇班級」引導卡並自動開班級選擇。
+//   2. 班級偏好改存裝置層 localStorage.user_class（未登入都記得），
+//      已選過 → 重開 App 直接載入該班課表。
+//   3. S2B（初二望）教師資料修正（分組數學 譚鴻生·余麗君、數學AI 黃燦霖·譚鴻生 等）。
+//   4. CACHE_NAME 升版，確保 index.html / scripts / data 全部重新 precache。
+const CACHE_NAME = 'timetable-v2.7.0';
 const urlsToCache = [
     './',
     './index.html',
     './manifest.json',
     './styles/main.css',
+    './styles/icons.css',
     './styles/splash.css',
     './styles/themes/dark.css',
     './styles/themes/light.css',
@@ -15,9 +24,9 @@ const urlsToCache = [
     './styles/pages/schedule.css',
     './styles/pages/realtime.css',
     './scripts/main.js',
-    './scripts/utils/time.js',
     './scripts/utils/storage.js',
-    './scripts/modules/search/search.js',
+    './scripts/utils/icons.js',
+    './scripts/utils/db.js',
     './scripts/modules/search/search.css',
     './scripts/modules/theme/theme.js',
     './scripts/modules/theme/theme.css',
@@ -30,14 +39,32 @@ const urlsToCache = [
     './scripts/modules/expand/expand.css',
     './scripts/modules/calendar/calendar.js',
     './scripts/modules/calendar/calendar.css',
+    './scripts/config/auth-config.js',
+    './scripts/modules/auth/auth.js',
+    './scripts/modules/auth/auth.css',
+    './scripts/modules/profile/profile.js',
+    './scripts/modules/profile/profile.css',
+    './scripts/modules/devtools/devtools.js',
+    './scripts/modules/devtools/devtools.css',
+    './scripts/modules/liquidglass/liquidglass.js',
+    './scripts/modules/liquidglass/liquidglass.css',
     './scripts/modules/homework/homework.js',
     './scripts/modules/homework/homework.css',
     './data/schedule.json',
+    './data/classes.json',
+    './data/schedules/junior2-xin.json',
+    './data/schedules/junior2-wang.json',
+    './data/schedules/junior2-ai.json',
+    './data/schedules/junior2-shan.json',
+    './data/schedules/junior2-zheng.json',
+    './data/schedules/junior2-guang.json',
     './data/holidays.json',
     './data/events.json',
     './data/homework.json',
     './assets/icons/icon-192.png',
-    './assets/icons/icon-512.png'
+    './assets/icons/icon-512.png',
+    './assets/icons/icon-maskable-512.png',
+    './assets/images/app-logo.svg'
 ];
 
 // 安裝：快取所有檔案
@@ -88,7 +115,10 @@ self.addEventListener('fetch', (event) => {
             }
             return response;
         }).catch(() => {
-            return caches.match(request).then((cached) => {
+            // ignoreSearch：離線時 request 可能帶住 ?v=2.5.0 版本戳，
+            // 但 precache 落嚟嘅係無 query 嘅版本（./data/classes.json）。
+            // 唔用 ignoreSearch 就會完全對唔上，變成離線讀唔到班級清單。
+            return caches.match(request, { ignoreSearch: true }).then((cached) => {
                 if (cached) return cached;
                 if (request.mode === 'navigate') {
                     return caches.match('./index.html');
